@@ -1,4 +1,4 @@
-
+/*
 // scripts/config.js
 const BEATMAP_PROVIDER = {
     // Beatmap .osz download
@@ -38,8 +38,8 @@ function getInfoUrl(sid) {
 function getInfoUrlV2(sid) {
     return `${BEATMAP_PROVIDER.API_INFO_V2}${sid}`;
 }
+*/
 
-/*
 
 // scripts/config.js
 
@@ -149,4 +149,4 @@ function getInfoUrlV2(sid) {
         return originalFetch.apply(this, args);
     };
 })();
-//*/
+//
