@@ -91,11 +91,11 @@
     </div>
   </div>
   <script>
-    addBeatmapList("https://api.sayobot.cn/beatmaplist?0=20&1=0&2=1&5=1");
+    addBeatmapList(getListUrl({ offset: 0, sort: "play_count:desc" }));
     var cur = 20;
     document.getElementById("btnmore").onclick = function () {
       addBeatmapList(
-        "https://api.sayobot.cn/beatmaplist?0=20&1=" + cur + "&2=1&5=1"
+        getListUrl({ offset: cur, sort: "play_count:desc" })
       );
       cur += 20;
     };

@@ -38,6 +38,7 @@ function getInfoUrl(sid) {
 function getInfoUrlV2(sid) {
     return `${BEATMAP_PROVIDER.API_INFO_V2}${sid}`;
 }
+
 */
 
 
@@ -55,12 +56,12 @@ const BEATMAP_PROVIDER = {
     // Cover image - redirected to official osu! assets
     COVER: "https://assets.ppy.sh/beatmaps/",
     
-    // Beatmap info API (osu.direct uses the same endpoint for set info)
-    API_INFO: "https://osu.direct/api/v2/s/",
-    API_INFO_V2: "https://osu.direct/api/v2/s/",
+    // Route osu.direct API requests through a CORS-friendly read-only relay.
+    API_INFO: "https://r.jina.ai/http://osu.direct/api/v2/s/",
+    API_INFO_V2: "https://r.jina.ai/http://osu.direct/api/v2/s/",
     
     // Beatmap list API (searching)
-    API_LIST: "https://osu.direct/api/v2/search"
+    API_LIST: "https://r.jina.ai/http://osu.direct/api/v2/search"
 };
 
 // Helper functions for URL construction
@@ -86,6 +87,28 @@ function getInfoUrlV2(sid) {
     return `${BEATMAP_PROVIDER.API_INFO_V2}${sid}`;
 }
 
+function getListUrl(options = {}) {
+    const {
+        offset = 0,
+        query = "",
+        sort = "last_updated:desc",
+        genre = "",
+        language = ""
+    } = options;
+    const limit = 20;
+    const params = new URLSearchParams({
+        limit: limit.toString(),
+        page: (Math.floor(offset / limit) + 1).toString(),
+        sort
+    });
+
+    if (query) params.set("q", query);
+    if (genre) params.set("g", genre);
+    if (language) params.set("l", language);
+
+    return `${BEATMAP_PROVIDER.API_LIST}?${params}`;
+}
+
 (function patchFetchForOsuDirect() {
     const originalFetch = window.fetch;
 
@@ -96,20 +119,37 @@ function getInfoUrlV2(sid) {
         if (typeof url === "string" && url.includes("osu.direct/api/v2/")) {
             const response = await originalFetch.apply(this, args);
             const originalJson = response.json.bind(response);
+            const isRelayResponse = response.headers.get("content-type")?.includes("text/plain");
             
-            // Override .json() to adapter osu!api v2 format -> Sayobot format
+            // Parse relay envelopes, then adapt osu! API v2 format to the site's format.
             response.json = async () => {
-                const data = await originalJson();
+                let data;
+                if (isRelayResponse) {
+                    const body = await response.text();
+                    const marker = "Markdown Content:\n";
+                    const content = body.includes(marker) ? body.split(marker, 2)[1].trim() : body;
+                    data = JSON.parse(content);
+                } else {
+                    data = await originalJson();
+                }
                 
                 // Case A: Search results (API_LIST)
-                if (data.beatmapsets && Array.isArray(data.beatmapsets)) {
+                if (Array.isArray(data)) {
                     return {
-                        data: data.beatmapsets.map(set => ({
+                        data: data.map(set => ({
                             sid: set.id,
                             title: set.title,
                             artist: set.artist,
                             creator: set.creator,
-                            approved: set.ranked
+                            approved: {
+                                ranked: 1,
+                                approved: 2,
+                                qualified: 3,
+                                loved: 4,
+                                pending: 0,
+                                wip: -1,
+                                graveyard: -2
+                            }[set.status] ?? 0
                         }))
                     };
                 }

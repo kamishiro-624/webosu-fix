@@ -299,6 +299,7 @@ var NSaddBeatmapList = {
             NSaddBeatmapList.addMoreInfo(box, res.data);
         } catch (error) {
             console.error("Error fetching additional info for beatmap:", error);
+            box.data = [];
         }
     }
 }
@@ -324,21 +325,26 @@ async function addBeatmapList(listurl, list, filter, maxsize) {
         res.data = res.data.slice(0, maxsize);
     }
 
+    // Search providers may return large pages; keep the UI responsive and avoid API bursts.
+    if (res.data) {
+        res.data = res.data.slice(0, maxsize || 4);
+    }
+
     // add widget to webpage as soon as list is fetched
     for (let i = 0; i < res.data.length; ++i) {
         box.push(NSaddBeatmapList.addpreviewbox(res.data[i], list));
     }
 
-    // async add more info
-    for (let i = 0; i < res.data.length; ++i) {
-        box[i].sid = res.data[i].sid;
-        await NSaddBeatmapList.requestMoreInfo(box[i]);
-        box[i].onclick = function (e) {
-            // this is effective only when box.data is available
-            createDifficultyList(box[i], e);
-            startdownload(box[i]);
+    // Load details in parallel so one slow request does not block every other card.
+    await Promise.all(box.map(async function (beatmapBox, index) {
+        beatmapBox.sid = res.data[index].sid;
+        beatmapBox.data = [];
+        beatmapBox.onclick = function (e) {
+            createDifficultyList(beatmapBox, e);
+            startdownload(beatmapBox);
         };
-    }
+        await NSaddBeatmapList.requestMoreInfo(beatmapBox);
+    }));
 
     if (window.beatmaplistLoadedCallback) {
         window.beatmaplistLoadedCallback();

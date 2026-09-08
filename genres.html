@@ -126,20 +126,12 @@
         list.removeChild(list.firstChild);
       }
       addBeatmapList(
-        "https://api.sayobot.cn/beatmaplist?0=20&1=0&2=4&5=1&7=" +
-        genre +
-        "&8=" +
-        lang
+        getListUrl({ offset: 0, genre: genre, language: lang })
       );
       var cur = 20;
       document.getElementById("btnmore").onclick = function () {
         addBeatmapList(
-          "https://api.sayobot.cn/beatmaplist?0=20&1=" +
-          cur +
-          "&2=4&5=1&7=" +
-          genre +
-          "&8=" +
-          lang
+          getListUrl({ offset: cur, genre: genre, language: lang })
         );
         cur += 20;
       };
