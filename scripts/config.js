@@ -20,7 +20,7 @@ const BEATMAP_PROVIDER = {
 
 // Helper functions for URL construction
 function getDownloadUrl(sid) {
-    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}`;
+    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}?noVideo=1`;
 }
 
 function getDownloadUrls(sid) {
@@ -52,8 +52,9 @@ function getInfoUrlV2(sid) {
 // scripts/config.js
 
 const BEATMAP_PROVIDER = {
-    // Beatmap .osz download. Catboy supports browser CORS and avoids the unstable QUIC edges.
-    DOWNLOAD: "https://catboy.best/d/",
+    // Beatmap .osz download. Nerinyan returns a CORS-enabled redirect to the archive.
+    DOWNLOAD: "https://api.nerinyan.moe/d/",
+    DOWNLOAD_PROXY: "https://webosu-download-proxy.webosu-2-nerinyan-github-io.workers.dev",
     
     // Audio preview (mp3) - redirected to official osu! assets
     PREVIEW: "https://b.ppy.sh/preview/",
@@ -71,14 +72,19 @@ const BEATMAP_PROVIDER = {
 
 // Helper functions for URL construction
 function getDownloadUrl(sid) {
-    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}`;
+    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}?noVideo=1`;
 }
 
 function getDownloadUrls(sid) {
+    const proxyUrl = BEATMAP_PROVIDER.DOWNLOAD_PROXY
+        ? `${BEATMAP_PROVIDER.DOWNLOAD_PROXY}/api/download?sid=${encodeURIComponent(sid)}`
+        : `/api/download?sid=${encodeURIComponent(sid)}`;
+
     return [
+        proxyUrl,
         getDownloadUrl(sid),
         `https://osu.direct/d/${sid}`,
-        `https://api.nerinyan.moe/d/${sid}?noVideo=1`
+        `https://catboy.best/d/${sid}`
     ];
 }
 

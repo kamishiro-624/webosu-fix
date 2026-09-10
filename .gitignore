@@ -4,3 +4,4 @@ env.sh
 defaultskin
 lazerskin
 tests
+.wrangler/

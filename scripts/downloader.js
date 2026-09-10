@@ -99,10 +99,15 @@ function startdownload(box) {
                 try {
                     const separator = baseUrl.includes("?") ? "&" : "?";
                     const response = await fetch(`${baseUrl}${separator}attempt=${attempt}`, {
-                        cache: "no-store"
+                        cache: "no-store",
+                        mode: "cors",
+                        credentials: "omit"
                     });
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    if (!response.body) {
+                        throw new Error("Download response has no readable body");
                     }
                     return response;
                 } catch (error) {

@@ -1,0 +1,5 @@
+{
+  "name": "webosu-download-proxy",
+  "compatibility_date": "2026-09-10",
+  "main": "workers/download-proxy.js"
+}
