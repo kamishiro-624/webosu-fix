@@ -23,6 +23,13 @@ function getDownloadUrl(sid) {
     return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}`;
 }
 
+function getDownloadUrls(sid) {
+    return [
+        getDownloadUrl(sid),
+        `https://api.nerinyan.moe/d/${sid}?noVideo=1`
+    ];
+}
+
 function getPreviewUrl(sid) {
     return `${BEATMAP_PROVIDER.PREVIEW}${sid}.mp3`;
 }
@@ -45,10 +52,8 @@ function getInfoUrlV2(sid) {
 // scripts/config.js
 
 const BEATMAP_PROVIDER = {
-    // Beatmap .osz download 
-    // WE MUST USE A CORS-FRIENDLY MIRROR HERE. 
-    // osu.direct blocks browser fetches, but NeriNyan allows them.
-    DOWNLOAD: "https://api.nerinyan.moe/d/",
+    // Beatmap .osz download. Catboy supports browser CORS and avoids the unstable QUIC edges.
+    DOWNLOAD: "https://catboy.best/d/",
     
     // Audio preview (mp3) - redirected to official osu! assets
     PREVIEW: "https://b.ppy.sh/preview/",
@@ -66,8 +71,15 @@ const BEATMAP_PROVIDER = {
 
 // Helper functions for URL construction
 function getDownloadUrl(sid) {
-    // NeriNyan supports adding &noVideo=1 to save bandwidth
-    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}?noVideo=1`;
+    return `${BEATMAP_PROVIDER.DOWNLOAD}${sid}`;
+}
+
+function getDownloadUrls(sid) {
+    return [
+        getDownloadUrl(sid),
+        `https://osu.direct/d/${sid}`,
+        `https://api.nerinyan.moe/d/${sid}?noVideo=1`
+    ];
 }
 
 function getPreviewUrl(sid) {

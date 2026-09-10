@@ -67,7 +67,7 @@ function startdownload(box) {
         return;
     }
 
-    const url = getDownloadUrl(box.sid);
+    const urls = getDownloadUrls(box.sid);
     box.downloading = true;
     box.classList.add("downloading");
 
@@ -92,18 +92,36 @@ function startdownload(box) {
 
     box.download_starttime = new Date().getTime();
 
-    fetch(url)
+    async function fetchDownload() {
+        let lastError;
+        for (const baseUrl of urls) {
+            for (let attempt = 0; attempt < 2; ++attempt) {
+                try {
+                    const separator = baseUrl.includes("?") ? "&" : "?";
+                    const response = await fetch(`${baseUrl}${separator}attempt=${attempt}`, {
+                        cache: "no-store"
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response;
+                } catch (error) {
+                    lastError = error;
+                    console.warn("Beatmap download attempt failed:", error.message);
+                }
+            }
+        }
+        throw lastError || new Error("No download provider responded");
+    }
+
+    fetchDownload()
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const contentLength = response.headers.get('content-length');
-            if (!contentLength) {
-                throw new Error("Content-Length header is missing");
-            }
-
-            const total = parseInt(contentLength, 10);
+            const total = contentLength ? parseInt(contentLength, 10) : 0;
             let loaded = 0;
             bar.max = total;
 
@@ -117,7 +135,9 @@ function startdownload(box) {
                     }
 
                     loaded += value.length;
-                    bar.value = loaded;
+                    if (total) {
+                        bar.value = loaded;
+                    }
 
                     chunks.push(value);
                     return read();
@@ -136,7 +156,7 @@ function startdownload(box) {
         })
         .catch(error => {
             console.error("Download failed:", error.message);
-            alert("Beatmap download failed. Please retry later.");
+            alert("Beatmap download failed. Please try again or check your network connection.");
             box.downloading = false;
             box.classList.remove("downloading");
         });
