@@ -59,6 +59,16 @@
 
   <div class="main-page" id="main-page">
     <div class="main-content">
+      <form class="difficulty-filter" id="difficulty-filter">
+        <label for="min-stars">Difficulty</label>
+        <input id="min-stars" type="range" min="0" max="10" step="0.1" value="0">
+        <output id="min-stars-value" for="min-stars">0.0</output>
+        <span>-</span>
+        <input id="max-stars" type="range" min="0" max="10" step="0.1" value="10">
+        <output id="max-stars-value" for="max-stars">10.0</output>
+        <span>stars</span>
+        <button type="submit">Apply</button>
+      </form>
       <div class="sort-nav">
         <div class="title">Genre</div>
         <div class="selitem" genre="1">All</div>
@@ -118,6 +128,9 @@
     </div>
   </div>
   <script>
+    let difficultyFilter = setupDifficultyFilter(function () {
+      search(curgenre, curlang);
+    });
     let btns = document.getElementsByClassName("selitem");
     function search(genre, lang) {
       // clear list
@@ -126,12 +139,14 @@
         list.removeChild(list.firstChild);
       }
       addBeatmapList(
-        getListUrl({ offset: 0, genre: genre, language: lang })
+        getListUrl({ offset: 0, genre: genre, language: lang }),
+        document.getElementById("beatmap-list"), undefined, undefined, difficultyFilter
       );
       var cur = 20;
       document.getElementById("btnmore").onclick = function () {
         addBeatmapList(
-          getListUrl({ offset: cur, genre: genre, language: lang })
+          getListUrl({ offset: cur, genre: genre, language: lang }),
+          document.getElementById("beatmap-list"), undefined, undefined, difficultyFilter
         );
         cur += 20;
       };

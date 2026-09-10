@@ -135,6 +135,48 @@ function getDifficultyFilter(minStars, maxStars) {
     };
 }
 
+function setupDifficultyFilter(onApply) {
+    let params = new URL(window.location.href).searchParams;
+    let minStars = Number(params.get("minStars")) || 0;
+    let maxStars = Number(params.get("maxStars")) || 10;
+    let minSlider = document.getElementById("min-stars");
+    let maxSlider = document.getElementById("max-stars");
+    let minValue = document.getElementById("min-stars-value");
+    let maxValue = document.getElementById("max-stars-value");
+
+    minSlider.value = minStars;
+    maxSlider.value = maxStars;
+
+    function updateValues() {
+        if (Number(minSlider.value) > Number(maxSlider.value)) {
+            maxSlider.value = minSlider.value;
+        }
+        minValue.value = Number(minSlider.value).toFixed(1);
+        maxValue.value = Number(maxSlider.value).toFixed(1);
+    }
+
+    minSlider.oninput = updateValues;
+    maxSlider.oninput = updateValues;
+    updateValues();
+
+    document.getElementById("difficulty-filter").onsubmit = function (event) {
+        event.preventDefault();
+        let nextParams = new URLSearchParams(window.location.search);
+        let min = minSlider.value;
+        let max = maxSlider.value;
+        if (min === "0") nextParams.delete("minStars");
+        else nextParams.set("minStars", min);
+        if (max === "10") nextParams.delete("maxStars");
+        else nextParams.set("maxStars", max);
+        if (onApply) onApply();
+        else window.location.search = nextParams.toString();
+    };
+
+    return function (difficulties) {
+        return getDifficultyFilter(Number(minSlider.value), Number(maxSlider.value))(difficulties);
+    };
+}
+
 (function patchFetchForOsuDirect() {
     const originalFetch = window.fetch;
 

@@ -145,32 +145,7 @@
   
 
   <script>
-    let filterParams = new URL(window.location.href).searchParams;
-    let minStars = Number(filterParams.get("minStars")) || 0;
-    let maxStars = Number(filterParams.get("maxStars")) || 10;
-    let difficultyFilter = getDifficultyFilter(minStars, maxStars);
-    document.getElementById("min-stars").value = minStars;
-    document.getElementById("max-stars").value = maxStars;
-    document.getElementById("min-stars-value").value = minStars.toFixed(1);
-    document.getElementById("max-stars-value").value = maxStars.toFixed(1);
-    function updateDifficultyValues() {
-      let minSlider = document.getElementById("min-stars");
-      let maxSlider = document.getElementById("max-stars");
-      if (Number(minSlider.value) > Number(maxSlider.value)) maxSlider.value = minSlider.value;
-      document.getElementById("min-stars-value").value = Number(minSlider.value).toFixed(1);
-      document.getElementById("max-stars-value").value = Number(maxSlider.value).toFixed(1);
-    }
-    document.getElementById("min-stars").oninput = updateDifficultyValues;
-    document.getElementById("max-stars").oninput = updateDifficultyValues;
-    document.getElementById("difficulty-filter").onsubmit = function (event) {
-      event.preventDefault();
-      let params = new URLSearchParams(window.location.search);
-      let min = document.getElementById("min-stars").value;
-      let max = document.getElementById("max-stars").value;
-      if (min === "0") params.delete("minStars"); else params.set("minStars", min);
-      if (max === "10") params.delete("maxStars"); else params.set("maxStars", max);
-      window.location.search = params.toString();
-    };
+    let difficultyFilter = setupDifficultyFilter();
     // recently played
     if (window.localforage) {
       let listhistory = document.getElementById("beatmap-list-history");

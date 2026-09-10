@@ -61,6 +61,16 @@
   <div class="main-page" id="main-page">
 
     <div class="main-content">
+      <form class="difficulty-filter" id="difficulty-filter">
+        <label for="min-stars">Difficulty</label>
+        <input id="min-stars" type="range" min="0" max="10" step="0.1" value="0">
+        <output id="min-stars-value" for="min-stars">0.0</output>
+        <span>-</span>
+        <input id="max-stars" type="range" min="0" max="10" step="0.1" value="10">
+        <output id="max-stars-value" for="max-stars">10.0</output>
+        <span>stars</span>
+        <button type="submit">Apply</button>
+      </form>
       <div class="beatmap-list" id="beatmap-list">
         <!-- to be filled in script -->
       </div>
@@ -95,11 +105,14 @@
     </div>
   </div>
   <script>
-    addBeatmapList(getListUrl({ offset: 0, sort: "last_updated:desc" }));
+    let difficultyFilter = setupDifficultyFilter();
+    addBeatmapList(getListUrl({ offset: 0, sort: "last_updated:desc" }),
+      document.getElementById("beatmap-list"), undefined, undefined, difficultyFilter);
     var cur = 20;
     document.getElementById("btnmore").onclick = function () {
       addBeatmapList(
-        getListUrl({ offset: cur, sort: "last_updated:desc" })
+        getListUrl({ offset: cur, sort: "last_updated:desc" }),
+        document.getElementById("beatmap-list"), undefined, undefined, difficultyFilter
       );
       cur += 20;
     };

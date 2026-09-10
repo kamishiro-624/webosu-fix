@@ -106,22 +106,7 @@
   <script>
     let url = new URL(window.location.href);
     let keyword = url.searchParams.get("q");
-    let minStars = Number(url.searchParams.get("minStars")) || 0;
-    let maxStars = Number(url.searchParams.get("maxStars")) || 10;
-    let difficultyFilter = getDifficultyFilter(minStars, maxStars);
-    document.getElementById("min-stars").value = minStars;
-    document.getElementById("max-stars").value = maxStars;
-    document.getElementById("min-stars-value").value = minStars.toFixed(1);
-    document.getElementById("max-stars-value").value = maxStars.toFixed(1);
-    function updateDifficultyValues() {
-      let minSlider = document.getElementById("min-stars");
-      let maxSlider = document.getElementById("max-stars");
-      if (Number(minSlider.value) > Number(maxSlider.value)) maxSlider.value = minSlider.value;
-      document.getElementById("min-stars-value").value = Number(minSlider.value).toFixed(1);
-      document.getElementById("max-stars-value").value = Number(maxSlider.value).toFixed(1);
-    }
-    document.getElementById("min-stars").oninput = updateDifficultyValues;
-    document.getElementById("max-stars").oninput = updateDifficultyValues;
+    let difficultyFilter = setupDifficultyFilter();
     document.getElementById("difficulty-filter").onsubmit = function (event) {
       event.preventDefault();
       let params = new URLSearchParams(window.location.search);
