@@ -186,6 +186,19 @@ nav .brand {
   opacity: 1;
 }
 
+.difficulty-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.difficulty-filter select,
+.difficulty-filter button {
+  min-height: 34px;
+}
+
 .pseudo.button {
   padding: 8px 12px;
   font-size: 14px;

@@ -308,9 +308,9 @@ var NSaddBeatmapList = {
 // adds symbols of these beatmap packs to webpage
 // listurl: url of api request that returns a list of beatmap packs
 // list: DOM element to insert beatmaps into
-// filter, maxsize: does't apply if not specified
+// filter, maxsize, difficultyFilter: does't apply if not specified
 // Note that some beatmaps may not contain std mode, so we request more maps than we need
-async function addBeatmapList(listurl, list, filter, maxsize) {
+async function addBeatmapList(listurl, list, filter, maxsize, difficultyFilter) {
     if (!list) list = document.getElementById("beatmap-list");
 
     // request beatmap pack list
@@ -344,6 +344,9 @@ async function addBeatmapList(listurl, list, filter, maxsize) {
             startdownload(beatmapBox);
         };
         await NSaddBeatmapList.requestMoreInfo(beatmapBox);
+        if (difficultyFilter && !difficultyFilter(beatmapBox.data)) {
+            beatmapBox.remove();
+        }
     }));
 
     if (window.beatmaplistLoadedCallback) {

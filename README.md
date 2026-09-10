@@ -12,6 +12,10 @@ Powered by [PixiJS](https://www.pixijs.com) and [Sayobot](https://osu.sayobot.cn
 
 This is an unofficial implementation of [Osu!](https://osu.ppy.sh). Scoring and judgement rules can differ from that of official Osu! and modes other than Osu!std are unsupported.
 
+## Changes
+- Bypassing network restrictions blocking API requests
+- Difficulty filter
+
 ## Footage
 
 game in action:

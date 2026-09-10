@@ -60,6 +60,35 @@
 
   <div class="main-page" id="main-page">
     <div class="main-content">
+      <form class="difficulty-filter" id="difficulty-filter">
+        <label for="min-stars">Minimum stars</label>
+        <select id="min-stars" name="minStars">
+          <option value="0">Any</option>
+          <option value="1">1+</option>
+          <option value="2">2+</option>
+          <option value="3">3+</option>
+          <option value="4">4+</option>
+          <option value="5">5+</option>
+          <option value="6">6+</option>
+          <option value="7">7+</option>
+          <option value="8">8+</option>
+          <option value="9">9+</option>
+        </select>
+        <label for="max-stars">Maximum stars</label>
+        <select id="max-stars" name="maxStars">
+          <option value="0">Any</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+        <button type="submit">Apply</button>
+      </form>
       <div class="beatmap-list" id="beatmap-list">
         <!-- to be filled in script -->
       </div>
@@ -96,6 +125,26 @@
   <script>
     let url = new URL(window.location.href);
     let keyword = url.searchParams.get("q");
+    let minStars = Number(url.searchParams.get("minStars")) || 0;
+    let maxStars = Number(url.searchParams.get("maxStars")) || 0;
+    let difficultyFilter = function (difficulties) {
+      return difficulties.some(function (difficulty) {
+        return difficulty.star >= minStars && (!maxStars || difficulty.star <= maxStars);
+      });
+    };
+    document.getElementById("min-stars").value = minStars;
+    document.getElementById("max-stars").value = maxStars;
+    document.getElementById("difficulty-filter").onsubmit = function (event) {
+      event.preventDefault();
+      let params = new URLSearchParams(window.location.search);
+      let selectedMin = document.getElementById("min-stars").value;
+      let selectedMax = document.getElementById("max-stars").value;
+      if (selectedMin === "0") params.delete("minStars");
+      else params.set("minStars", selectedMin);
+      if (selectedMax === "0") params.delete("maxStars");
+      else params.set("maxStars", selectedMax);
+      window.location.href = "search.html?" + params.toString();
+    };
     //document.getElementById("inputtext").value = keyword;
     var cur = 0;
     if (keyword == parseInt(keyword, 10)) {
@@ -104,13 +153,21 @@
     } else {
       // search keyword
       addBeatmapList(
-        getListUrl({ offset: 0, query: keyword })
+        getListUrl({ offset: 0, query: keyword }),
+        document.getElementById("beatmap-list"),
+        undefined,
+        undefined,
+        difficultyFilter
       );
       cur = 20;
     }
     document.getElementById("btnmore").onclick = function () {
       addBeatmapList(
-        getListUrl({ offset: cur, query: keyword })
+        getListUrl({ offset: cur, query: keyword }),
+        document.getElementById("beatmap-list"),
+        undefined,
+        undefined,
+        difficultyFilter
       );
       cur += 20;
     };
