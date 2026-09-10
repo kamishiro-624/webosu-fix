@@ -356,7 +356,7 @@ async function addBeatmapList(listurl, list, filter, maxsize, difficultyFilter) 
     }
 }
 
-function addBeatmapSid(sid, list) {
+function addBeatmapSid(sid, list, difficultyFilter) {
     if (!list) list = document.getElementById("beatmap-list");
     const url = getInfoUrlV2(sid);
 
@@ -370,7 +370,11 @@ function addBeatmapSid(sid, list) {
             // use data of first track as set data
             const box = NSaddBeatmapList.addpreviewbox(res.data, list);
             box.sid = res.data.sid;
-            NSaddBeatmapList.requestMoreInfo(box);
+            NSaddBeatmapList.requestMoreInfo(box).then(function () {
+                if (difficultyFilter && !difficultyFilter(box.data)) {
+                    box.remove();
+                }
+            });
             box.onclick = function (e) {
                 // this is effective only when box.data is available
                 createDifficultyList(box, e);

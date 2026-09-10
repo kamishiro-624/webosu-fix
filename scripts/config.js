@@ -127,6 +127,14 @@ function getListUrl(options = {}) {
     return `${BEATMAP_PROVIDER.API_LIST}?${params}`;
 }
 
+function getDifficultyFilter(minStars, maxStars) {
+    return function (difficulties) {
+        return difficulties.some(function (difficulty) {
+            return difficulty.star >= minStars && difficulty.star <= maxStars;
+        });
+    };
+}
+
 (function patchFetchForOsuDirect() {
     const originalFetch = window.fetch;
 

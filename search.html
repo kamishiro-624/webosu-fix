@@ -61,32 +61,13 @@
   <div class="main-page" id="main-page">
     <div class="main-content">
       <form class="difficulty-filter" id="difficulty-filter">
-        <label for="min-stars">Minimum stars</label>
-        <select id="min-stars" name="minStars">
-          <option value="0">Any</option>
-          <option value="1">1+</option>
-          <option value="2">2+</option>
-          <option value="3">3+</option>
-          <option value="4">4+</option>
-          <option value="5">5+</option>
-          <option value="6">6+</option>
-          <option value="7">7+</option>
-          <option value="8">8+</option>
-          <option value="9">9+</option>
-        </select>
-        <label for="max-stars">Maximum stars</label>
-        <select id="max-stars" name="maxStars">
-          <option value="0">Any</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-        </select>
+        <label for="min-stars">Difficulty</label>
+        <input id="min-stars" type="range" min="0" max="10" step="0.1" value="0">
+        <output id="min-stars-value" for="min-stars">0.0</output>
+        <span>-</span>
+        <input id="max-stars" type="range" min="0" max="10" step="0.1" value="10">
+        <output id="max-stars-value" for="max-stars">10.0</output>
+        <span>stars</span>
         <button type="submit">Apply</button>
       </form>
       <div class="beatmap-list" id="beatmap-list">
@@ -126,14 +107,21 @@
     let url = new URL(window.location.href);
     let keyword = url.searchParams.get("q");
     let minStars = Number(url.searchParams.get("minStars")) || 0;
-    let maxStars = Number(url.searchParams.get("maxStars")) || 0;
-    let difficultyFilter = function (difficulties) {
-      return difficulties.some(function (difficulty) {
-        return difficulty.star >= minStars && (!maxStars || difficulty.star <= maxStars);
-      });
-    };
+    let maxStars = Number(url.searchParams.get("maxStars")) || 10;
+    let difficultyFilter = getDifficultyFilter(minStars, maxStars);
     document.getElementById("min-stars").value = minStars;
     document.getElementById("max-stars").value = maxStars;
+    document.getElementById("min-stars-value").value = minStars.toFixed(1);
+    document.getElementById("max-stars-value").value = maxStars.toFixed(1);
+    function updateDifficultyValues() {
+      let minSlider = document.getElementById("min-stars");
+      let maxSlider = document.getElementById("max-stars");
+      if (Number(minSlider.value) > Number(maxSlider.value)) maxSlider.value = minSlider.value;
+      document.getElementById("min-stars-value").value = Number(minSlider.value).toFixed(1);
+      document.getElementById("max-stars-value").value = Number(maxSlider.value).toFixed(1);
+    }
+    document.getElementById("min-stars").oninput = updateDifficultyValues;
+    document.getElementById("max-stars").oninput = updateDifficultyValues;
     document.getElementById("difficulty-filter").onsubmit = function (event) {
       event.preventDefault();
       let params = new URLSearchParams(window.location.search);
@@ -141,7 +129,7 @@
       let selectedMax = document.getElementById("max-stars").value;
       if (selectedMin === "0") params.delete("minStars");
       else params.set("minStars", selectedMin);
-      if (selectedMax === "0") params.delete("maxStars");
+      if (selectedMax === "10") params.delete("maxStars");
       else params.set("maxStars", selectedMax);
       window.location.href = "search.html?" + params.toString();
     };

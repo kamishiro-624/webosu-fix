@@ -70,6 +70,16 @@
         Announcement: This site is still under development. If you encounter
         any issues, read <a href="faq.html">the FAQ</a>. Now ad-free again!
       </div>
+      <form class="difficulty-filter" id="difficulty-filter">
+        <label for="min-stars">Difficulty</label>
+        <input id="min-stars" type="range" min="0" max="10" step="0.1" value="0">
+        <output id="min-stars-value" for="min-stars">0.0</output>
+        <span>-</span>
+        <input id="max-stars" type="range" min="0" max="10" step="0.1" value="10">
+        <output id="max-stars-value" for="max-stars">10.0</output>
+        <span>stars</span>
+        <button type="submit">Apply</button>
+      </form>
       <br />
       <div class="index-area">
         <a onclick="genRandomList()" class="more" style="cursor:pointer;">Get new random Beatmaps</a>
@@ -135,6 +145,32 @@
   
 
   <script>
+    let filterParams = new URL(window.location.href).searchParams;
+    let minStars = Number(filterParams.get("minStars")) || 0;
+    let maxStars = Number(filterParams.get("maxStars")) || 10;
+    let difficultyFilter = getDifficultyFilter(minStars, maxStars);
+    document.getElementById("min-stars").value = minStars;
+    document.getElementById("max-stars").value = maxStars;
+    document.getElementById("min-stars-value").value = minStars.toFixed(1);
+    document.getElementById("max-stars-value").value = maxStars.toFixed(1);
+    function updateDifficultyValues() {
+      let minSlider = document.getElementById("min-stars");
+      let maxSlider = document.getElementById("max-stars");
+      if (Number(minSlider.value) > Number(maxSlider.value)) maxSlider.value = minSlider.value;
+      document.getElementById("min-stars-value").value = Number(minSlider.value).toFixed(1);
+      document.getElementById("max-stars-value").value = Number(maxSlider.value).toFixed(1);
+    }
+    document.getElementById("min-stars").oninput = updateDifficultyValues;
+    document.getElementById("max-stars").oninput = updateDifficultyValues;
+    document.getElementById("difficulty-filter").onsubmit = function (event) {
+      event.preventDefault();
+      let params = new URLSearchParams(window.location.search);
+      let min = document.getElementById("min-stars").value;
+      let max = document.getElementById("max-stars").value;
+      if (min === "0") params.delete("minStars"); else params.set("minStars", min);
+      if (max === "10") params.delete("maxStars"); else params.set("maxStars", max);
+      window.location.search = params.toString();
+    };
     // recently played
     if (window.localforage) {
       let listhistory = document.getElementById("beatmap-list-history");
@@ -162,7 +198,7 @@
     // new
     addBeatmapList(getListUrl({ sort: "last_updated:desc" }),
       document.getElementById("beatmap-list-new"),
-      function (t) { return (t.modes & 1) != 0; }, 4);
+      function (t) { return (t.modes & 1) != 0; }, 4, difficultyFilter);
     // random
     function genRandomList() {
       // clear list
@@ -171,11 +207,11 @@
       // fill list
       let randstart = Math.floor(Math.random() * 20000);
       addBeatmapList(getListUrl({ offset: randstart, sort: "last_updated:desc" }), list,
-        function (t) { while (list.firstChild) list.removeChild(list.firstChild); return (t.modes & 1) != 0; }, 4);
+        function (t) { while (list.firstChild) list.removeChild(list.firstChild); return (t.modes & 1) != 0; }, 4, difficultyFilter);
     }
     genRandomList();
     // hot
-    addBeatmapList(getListUrl({ sort: "play_count:desc" }), document.getElementById("beatmap-list-hot"));
+    addBeatmapList(getListUrl({ sort: "play_count:desc" }), document.getElementById("beatmap-list-hot"), undefined, undefined, difficultyFilter);
     // liked
     if (window.localforage) {
       window.localforage.getItem("likedsidset", function (err, val) {
@@ -187,7 +223,7 @@
           let listlike = document.getElementById("beatmap-list-liked");
           list = Array.from(val);
           for (let i = 0; i < list.length && i < 4; ++i)
-            addBeatmapSid(list[i], listlike);
+            addBeatmapSid(list[i], listlike, difficultyFilter);
         }
         else {
           document.getElementById("beatmap-list-liked").innerText = "Heart any beatmap to add them here.";
